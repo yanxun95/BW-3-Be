@@ -4,6 +4,8 @@ import listEndpoints from "express-list-endpoints"
 import cors from "cors"
 import experienceRouter from "./services/experience/index.js"
 import { notFoundHandler, badRequestHandler, genericErrorHandler } from "./errorHandlers.js"
+/////////////////////////////////
+import profileRouter from "./services/profiles/index.js"
 
 const server = express()
 
@@ -17,6 +19,8 @@ server.use(express.json())
 // ************************* ROUTES ************************************
 
 server.use("/experience", experienceRouter)
+server.use("/profiles", profileRouter)
+
 
 // ************************** ERROR HANDLERS ***************************
 
