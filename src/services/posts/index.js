@@ -1,9 +1,11 @@
 import express from "express"
 import createHttpError from "http-errors"
 import PostModel from "./schema.js"
+import ProfileModel from "../profiles/schema.js"
 import multer from "multer"
 import { v2 as cloudinary } from "cloudinary"
 import { CloudinaryStorage } from "multer-storage-cloudinary"
+import mongoose from "mongoose"
 
 // - GET https://yourapi.herokuapp.com/api/posts/
 // Retrieve posts
@@ -29,16 +31,17 @@ const cloudStorage = new CloudinaryStorage({
 
 postRoutes.get("/", async (req, res, next) => {
     try {
-        const posts = await PostModel.find()
+        const posts = await PostModel.find().populate({ path: "user", select: '-experiences -__v' })
 
         res.send(posts)
     } catch (error) {
         next(error)
     }
 })
-postRoutes.post("/", async (req, res, next) => {
+
+postRoutes.post("/:profileId", async (req, res, next) => {
     try {
-        const newPost = new PostModel(req.body) // it will validate the req.body, if the response is not ok Mongoose will throw a ValidationError
+        const newPost = new PostModel({ ...req.body, user: mongoose.Types.ObjectId(req.params.profileId) })
         const { _id } = await newPost.save()
 
         res.status(201).send({ _id })
@@ -46,11 +49,12 @@ postRoutes.post("/", async (req, res, next) => {
         next(error)
     }
 })
+
 postRoutes.get("/:postId", async (req, res, next) => {
     try {
         const postId = req.params.postId
 
-        const post = await PostModel.findById(postId)
+        const post = await PostModel.findById(postId).populate({ path: "user", select: '-experiences -__v' })
 
         if (post) {
             res.send(post)
