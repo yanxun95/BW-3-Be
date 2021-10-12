@@ -6,6 +6,7 @@ import multer from "multer";
 import { v2 as cloudinary } from "cloudinary"
 import { CloudinaryStorage } from "multer-storage-cloudinary"
 import { pipeline } from "stream";
+import {gettingpdfwithcontent} from "./pdf.js"
 
 const profileRouter = express.Router()
 
@@ -76,9 +77,17 @@ profileRouter.post("/:id/picture", multer({ storage: cloudStorage }).single("pro
     }
 })
 
-profileRouter.get("/CVPdf", async (req, res, next) => {
+profileRouter.get("/:id/Pdf", async (req, res, next) => {
     try {
         res.setHeader("Content-Disposition", `attachment; filename: cv.pdf`)
+        const pdfdata = await profilemodel.findById(req.params.id)
+        const {name, surname, email, image,area, experiences, bio} = pdfdata
+        console.log(pdfdata)
+        const source = await gettingpdfwithcontent({name, surname, email, image,area, experiences, bio})
+        const destination = res
+        pipeline(source, destination, err => {
+            if(err) next(error)
+        })
 
     } catch (error) {
         next(error)
