@@ -5,7 +5,7 @@ import profilemodel from "./schema.js"
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary"
 import { CloudinaryStorage } from "multer-storage-cloudinary"
-import {pipeline} from "stream";
+import { pipeline } from "stream";
 
 const profileRouter = express.Router()
 
@@ -16,9 +16,9 @@ const cloudStorage = new CloudinaryStorage({
     },
 })
 
-profileRouter.get("/", async(req, res, next) => {
+profileRouter.get("/", async (req, res, next) => {
     try {
-        const profiles = await profilemodel.find()
+        const profiles = await profilemodel.find().populate('experiences')
 
         res.send(profiles)
     } catch (error) {
@@ -26,60 +26,60 @@ profileRouter.get("/", async(req, res, next) => {
     }
 })
 
-profileRouter.post("/", async(req, res, next) => {
+profileRouter.post("/", async (req, res, next) => {
     try {
         const postnewprofile = new profilemodel(req.body)
-        const {_id} = await postnewprofile.save()
-        res.status(201).send({_id})
+        const { _id } = await postnewprofile.save()
+        res.status(201).send({ _id })
     } catch (error) {
         next(error)
     }
 })
 
-profileRouter.get("/:id", async(req, res, next) => {
+profileRouter.get("/:id", async (req, res, next) => {
     try {
         const eachprofile = await profilemodel.findById(req.params.id)
-        if(eachprofile) res.send(eachprofile)
+        if (eachprofile) res.send(eachprofile)
         else next(createHttpError(404, `profile with id ${req.params.id} is not found`))
     } catch (error) {
         next(error)
     }
 })
 
-profileRouter.put("/:id", async(req, res, next) => {
+profileRouter.put("/:id", async (req, res, next) => {
     try {
-        const updateprofile = await profilemodel.findByIdAndUpdate(req.params.id, req.body, {new: true})
-        if(updateprofile) res.send(updateprofile)
+        const updateprofile = await profilemodel.findByIdAndUpdate(req.params.id, req.body, { new: true })
+        if (updateprofile) res.send(updateprofile)
         else next(createHttpError(404, `profile with id ${req.params.id} is not found`))
     } catch (error) {
         next(error)
     }
 })
 
-profileRouter.delete("/:id", async(req, res, next) => {
+profileRouter.delete("/:id", async (req, res, next) => {
     try {
         const deleteprofile = await profilemodel.findByIdAndDelete(req.params.id)
-        if(deleteprofile) res.status(204).send({message: "Deleted Successfully"})
+        if (deleteprofile) res.status(204).send({ message: "Deleted Successfully" })
         else next(createHttpError(404, `profile with id ${req.params.id} is not found`))
     } catch (error) {
         next(error)
     }
 })
 
-profileRouter.post("/:id/picture", multer({storage: cloudStorage}).single("profilepic"), async(req, res, next) => {
+profileRouter.post("/:id/picture", multer({ storage: cloudStorage }).single("profilepic"), async (req, res, next) => {
     try {
         console.log(req.file)
-        const profileImage = await profilemodel.findByIdAndUpdate(req.params.id, {$set: {image:req.file.path}} ,{new: true})
+        const profileImage = await profilemodel.findByIdAndUpdate(req.params.id, { $set: { image: req.file.path } }, { new: true })
         res.send(profileImage)
     } catch (error) {
         next(error)
     }
 })
 
-profileRouter.get("/CVPdf", async(req, res, next) => {
+profileRouter.get("/CVPdf", async (req, res, next) => {
     try {
         res.setHeader("Content-Disposition", `attachment; filename: cv.pdf`)
-        
+
     } catch (error) {
         next(error)
     }
