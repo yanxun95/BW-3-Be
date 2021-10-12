@@ -13,6 +13,13 @@ import { Readable } from 'stream';
 
 const experienceRouter = express.Router()
 
+const cloudStorage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: "experiencePicture",
+    },
+})
+
 experienceRouter.post("/:userId", async (req, res, next) => {
     try {
         const saveExperience = new ExperienceModel(req.body)
@@ -22,6 +29,8 @@ experienceRouter.post("/:userId", async (req, res, next) => {
         const modifiedProfile = await ProfileModel.findByIdAndUpdate(userId, { $push: { experiences: _id } }, {
             new: true,
         })
+
+
         if (modifiedProfile) {
             res.send(modifiedProfile)
         } else {
@@ -104,12 +113,10 @@ experienceRouter.delete("/:expId", async (req, res, next) => {
     }
 })
 
-experienceRouter.post("/:expId/picture", async (req, res, next) => {
+experienceRouter.post("/:expId/picture", multer({ storage: cloudStorage }).single("experiencePic"), async (req, res, next) => {
     try {
         const experienceId = req.params.expId
-        console.log(req.body.image)
-
-        const modifiedexperience = await ExperienceModel.findByIdAndUpdate(experienceId, { $set: { image: req.body.image } }, {
+        const modifiedexperience = await ExperienceModel.findByIdAndUpdate(experienceId, { $set: { image: req.file.path } }, {
             new: true,
         })
 
