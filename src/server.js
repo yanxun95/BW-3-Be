@@ -2,6 +2,7 @@ import express from "express"
 import mongoose from "mongoose"
 import listEndpoints from "express-list-endpoints"
 import cors from "cors"
+import postRoutes from "./services/posts/index.js"
 import { notFoundHandler, badRequestHandler, genericErrorHandler } from "./errorHandlers.js"
 
 const server = express()
@@ -15,7 +16,7 @@ server.use(express.json())
 
 // ************************* ROUTES ************************************
 
-
+server.use("/posts", postRoutes)
 
 // ************************** ERROR HANDLERS ***************************
 
