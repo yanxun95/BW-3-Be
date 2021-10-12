@@ -17,4 +17,4 @@ const experienceSchema = new Schema(
     { timestamps: true }
 )
 
-export default model("Experience", experienceSchema)
+export default model("Experiences", experienceSchema)

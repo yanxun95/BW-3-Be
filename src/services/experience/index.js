@@ -7,19 +7,26 @@ import { v2 as cloudinary } from "cloudinary"
 import { CloudinaryStorage } from "multer-storage-cloudinary"
 import q2m from "query-to-mongo"
 import { pipeline } from "stream"
-import { Parser } from "json2csv"
-import fs from "fs"
-import fastcsv from "fast-csv"
+import ProfileModel from "../profiles/schema.js"
+import json2csv from "json2csv"
+import { Readable } from 'stream';
 
 const experienceRouter = express.Router()
 
-experienceRouter.post("/", async (req, res, next) => {
+experienceRouter.post("/:userId", async (req, res, next) => {
     try {
-        const newExperience = { ...req.body, username: req.params.userName }
-        const saveExperience = new ExperienceModel(newExperience)
+        const saveExperience = new ExperienceModel(req.body)
         const { _id } = await saveExperience.save()
 
-        res.status(201).send(_id)
+        const userId = req.params.userId
+        const modifiedProfile = await ProfileModel.findByIdAndUpdate(userId, { $push: { experiences: _id } }, {
+            new: true,
+        })
+        if (modifiedProfile) {
+            res.send(modifiedProfile)
+        } else {
+            next(createHttpError(404, `Profile with id ${userId} not found!`))
+        }
     } catch (error) {
         next(error)
     }
@@ -118,15 +125,19 @@ experienceRouter.post("/:expId/picture", async (req, res, next) => {
 
 experienceRouter.get("/:userId/csv", async (req, res, next) => {
     try {
-        const experiences = await ExperienceModel.find();
-        const json2csvParser = new Parser({ fields: ['role', 'username', 'startDate', 'endDate', 'description', 'area', 'image'] });
-        const csv = json2csvParser.parse(experiences);
-        console.log(csv)
-        fs.writeFile("experience.csv", csv, function (error) {
-            if (error) throw error;
-            console.log("Write to experience.csv successfully!");
-        });
-        res.send("test")
+        res.setHeader("Content-Disposition", `attachment; filename=example.csv`)
+        const userId = req.params.userId;
+        const userExperiences = await ProfileModel.findById(userId, { "experiences": 1, "_id": 0 }).populate("experiences")
+        const experienceList = JSON.stringify(userExperiences.experiences);
+
+        const source = Readable.from(experienceList)
+        const transform = new json2csv.Transform({ fields: ['role', 'username', 'startDate', 'endDate', 'description', 'area', 'image'] })
+        const destination = res
+
+        pipeline(source, transform, destination, err => {
+            if (err) next(err)
+        })
+        // res.send(experienceList)
     } catch (error) {
         next(error)
     }
