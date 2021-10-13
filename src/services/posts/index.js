@@ -168,30 +168,26 @@ postRoutes.put("/comment/:commentId/:userId", async (req, res, next) => {
     }
 })
 
-// postRoutes.post("/:postId/like", async (req, res, next) => {
-//     try {
-//         const postId = req.params.postId
-//         const userId = req.body.userId
+postRoutes.post("/:postId/like", async (req, res, next) => {
+    try {
+        const postId = req.params.postId
+        const userId = req.body.userId
 
-//         const hasLiked = await LikeModel.find({ postId: postId, userId: userId })
-//         if (hasLiked.length === 0) {
-//             const newLike = new LikeModel({ ...req.body, postId: mongoose.Types.ObjectId(req.params.postId) })
-//             const { _id } = await newLike.save()
+        const hasLiked = await LikeModel.find({ postId: postId, userId: userId })
+        if (hasLiked.length === 0) {
+            const newLike = new LikeModel({ ...req.body, postId: mongoose.Types.ObjectId(req.params.postId) })
+            newLike.save()
+            await PostModel.findByIdAndUpdate(postId, { $inc: { likes: 1 } }, { new: true })
+        } else {
+            await LikeModel.deleteOne({ postid: postId, userId: userId })
+            await PostModel.findByIdAndUpdate(postId, { $inc: { likes: -1 } }, { new: true })
+        }
 
-//             PostModel.findByIdAndUpdate(postId, { $inc: { likes: 1 } }, { new: true })
-
-//         } else {
-//             const updateLike = PostModel.findByIdAndUpdate(postId, { $inc: { likes: -1 } }, { new: true })
-//         }
-//         // await LikeModel.updateOneById(postId, {})
-
-
-
-//         res.status(201).send("hi")
-//     } catch (error) {
-//         next(error)
-//     }
-// })
+        res.status(204).send()
+    } catch (error) {
+        next(error)
+    }
+})
 
 
 export default postRoutes
