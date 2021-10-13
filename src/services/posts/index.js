@@ -1,7 +1,8 @@
 import express from "express"
 import createHttpError from "http-errors"
 import PostModel from "./schema.js"
-import ProfileModel from "../profiles/schema.js"
+import CommentModel from "../comments/schema.js"
+import LikeModel from "../likes/schema.js"
 import multer from "multer"
 import { v2 as cloudinary } from "cloudinary"
 import { CloudinaryStorage } from "multer-storage-cloudinary"
@@ -32,6 +33,7 @@ const cloudStorage = new CloudinaryStorage({
 postRoutes.get("/", async (req, res, next) => {
     try {
         const posts = await PostModel.find().populate({ path: "user", select: '-experiences -__v' })
+        // likes
 
         res.send(posts)
     } catch (error) {
@@ -65,6 +67,7 @@ postRoutes.get("/:postId", async (req, res, next) => {
         next(error)
     }
 })
+
 postRoutes.put("/:postId", async (req, res, next) => {
     try {
         const postId = req.params.postId
@@ -75,16 +78,16 @@ postRoutes.put("/:postId", async (req, res, next) => {
         if (modifiedPost) {
             res.send(modifiedPost)
         } else {
-            next(createHttpError(404), `Post with id ${postId} is not found`)
+            next(createHttpError(404, `Post with id ${postId} is not found`))
         }
     } catch (error) {
         next(error)
     }
 })
+
 postRoutes.delete("/:postId", async (req, res, next) => {
     try {
         const postId = req.params.postId
-
         const deletedPost = await PostModel.findByIdAndDelete(postId)
 
         if (deletedPost) {
@@ -96,6 +99,7 @@ postRoutes.delete("/:postId", async (req, res, next) => {
         next(error)
     }
 })
+
 postRoutes.post("/:postId/picture", multer({ storage: cloudStorage }).single("post"), async (req, res, next) => {
     try {
         console.log(req.file)
@@ -105,5 +109,89 @@ postRoutes.post("/:postId/picture", multer({ storage: cloudStorage }).single("po
         next(error)
     }
 })
+
+postRoutes.post("/:postId/comment", async (req, res, next) => {
+    try {
+        const newComment = new CommentModel({ ...req.body, postId: mongoose.Types.ObjectId(req.params.postId) })
+        const { _id } = await newComment.save()
+
+        res.status(201).send({ _id })
+    } catch (error) {
+        next(error)
+    }
+})
+
+postRoutes.get("/:postId/comment", async (req, res, next) => {
+    try {
+        const post = await CommentModel.find({ postId: req.params.postId })
+
+        res.status(201).send(post)
+    } catch (error) {
+        next(error)
+    }
+})
+
+postRoutes.delete("/comment/:commentId", async (req, res, next) => {
+    try {
+        const commentId = req.params.commentId
+        const deletedComment = await CommentModel.findByIdAndDelete(commentId)
+
+        if (deletedComment) {
+            res.status(204).send()
+        } else {
+            next(createHttpError(404, `Comment with id ${commentId} is not found `))
+        }
+    } catch (error) {
+        next(error)
+    }
+})
+
+postRoutes.put("/comment/:commentId/:userId", async (req, res, next) => {
+    try {
+        const commentId = req.params.commentId
+        const checkId = await CommentModel.findById(commentId)
+        if (checkId.userId.toString() === req.params.userId) {
+            const modifiedComment = await CommentModel.findByIdAndUpdate(commentId, req.body, {
+                new: true
+            })
+            if (modifiedComment) {
+                res.send(modifiedComment)
+            } else {
+                next(createHttpError(404, `Comment with id ${commentId} is not found`))
+            }
+        } else {
+            next(createHttpError(404, `Only user who create the comment can edit the comment`))
+        }
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }
+})
+
+// postRoutes.post("/:postId/like", async (req, res, next) => {
+//     try {
+//         const postId = req.params.postId
+//         const userId = req.body.userId
+
+//         const hasLiked = await LikeModel.find({ postId: postId, userId: userId })
+//         if (hasLiked.length === 0) {
+//             const newLike = new LikeModel({ ...req.body, postId: mongoose.Types.ObjectId(req.params.postId) })
+//             const { _id } = await newLike.save()
+
+//             PostModel.findByIdAndUpdate(postId, { $inc: { likes: 1 } }, { new: true })
+
+//         } else {
+//             const updateLike = PostModel.findByIdAndUpdate(postId, { $inc: { likes: -1 } }, { new: true })
+//         }
+//         // await LikeModel.updateOneById(postId, {})
+
+
+
+//         res.status(201).send("hi")
+//     } catch (error) {
+//         next(error)
+//     }
+// })
+
 
 export default postRoutes

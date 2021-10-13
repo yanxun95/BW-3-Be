@@ -2,7 +2,6 @@ import mongoose from "mongoose"
 
 const { Schema, model } = mongoose
 
-
 const experienceSchema = new Schema(
     {
         role: { type: String, required: true },
