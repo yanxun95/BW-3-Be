@@ -9,7 +9,6 @@ import { notFoundHandler, badRequestHandler, genericErrorHandler } from "./error
 import profileRouter from "./services/profiles/index.js"
 
 const server = express()
-
 const port = process.env.PORT || 3001
 
 // ***************** CORS ***********************
