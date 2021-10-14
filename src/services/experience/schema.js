@@ -10,7 +10,7 @@ const experienceSchema = new Schema(
         endDate: { type: Date },
         description: { type: String, required: true },
         area: { type: String, required: true },
-        username: { type: String, required: true },
+        username: { type: String, required: false },
         image: { type: String, default: 'https://complianz.io/wp-content/uploads/2019/03/placeholder-300x202.jpg' },
     },
     { timestamps: true }
