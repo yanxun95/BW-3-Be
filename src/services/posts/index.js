@@ -103,7 +103,8 @@ postRoutes.delete("/:postId", async (req, res, next) => {
 postRoutes.post("/:postId/picture", multer({ storage: cloudStorage }).single("post"), async (req, res, next) => {
     try {
         console.log(req.file)
-        const postImage = await PostModel.findByIdAndUpdate(req.params.id, { $set: { image: req.file.path } }, { new: true })
+        const postId = req.params.postId
+        const postImage = await PostModel.findByIdAndUpdate(postId, { $set: { image: req.file.path } }, { new: true })
         res.send(postImage)
     } catch (error) {
         next(error)
