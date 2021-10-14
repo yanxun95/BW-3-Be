@@ -123,7 +123,7 @@ postRoutes.post("/:postId/comment", async (req, res, next) => {
 
 postRoutes.get("/:postId/comment", async (req, res, next) => {
     try {
-        const post = await CommentModel.find({ postId: req.params.postId })
+        const post = await CommentModel.find({ postId: req.params.postId }).populate("userId")
 
         res.status(201).send(post)
     } catch (error) {
