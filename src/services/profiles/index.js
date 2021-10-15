@@ -88,13 +88,8 @@ profileRouter.post("/:id/picture", multer({ storage: cloudStorage }).single("pro
 profileRouter.get("/:id/Pdf", async (req, res, next) => {
     try {
         res.setHeader("Content-Disposition", `attachment; filename: cv.pdf`)
-<<<<<<< HEAD
-        const pdfdata = await profilemodel.findById(req.params.id)
-        const { name, surname, email, image, area, experiences, bio } = pdfdata
-=======
         const pdfdata = await profilemodel.findById(req.params.id).populate('experiences')
-        const {name, surname, email, image,area, experiences, bio} = pdfdata
->>>>>>> seconddaypull
+        const { name, surname, email, image, area, experiences, bio } = pdfdata
         console.log(pdfdata)
         const source = await gettingpdfwithcontent({ name, surname, email, image, area, experiences, bio })
         const destination = res
