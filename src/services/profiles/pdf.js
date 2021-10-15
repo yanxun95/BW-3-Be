@@ -99,14 +99,8 @@ export const gettingpdfwithcontent = async(data) => {
     }
 
     const printer = new PdfPrinter(fonts)
-<<<<<<< HEAD
 
     const pdfReadableStream = printer.createPdfKitDocument(docDefinition, {})
-    // pdfReadableStream.pipe(fs.createWriteStream(`./src/services/profiles/sample.pdf`));
-=======
-
-    const pdfReadableStream =printer.createPdfKitDocument(docDefinition, {})
->>>>>>> seconddaypull
     pdfReadableStream.end()
 
     return pdfReadableStream;
