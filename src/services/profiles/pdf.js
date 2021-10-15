@@ -3,13 +3,8 @@ import imageDataURI from "image-data-uri";
 import fs from "fs-extra";
 
 
-<<<<<<< HEAD
 export const gettingpdfwithcontent = async (data) => {
 
-=======
-export const gettingpdfwithcontent = async(data) => {
-
->>>>>>> seconddaypull
     const imgDataUri = await imageDataURI.encodeFromURL(data.image)
     const fonts = {
         Roboto: {
@@ -18,11 +13,7 @@ export const gettingpdfwithcontent = async(data) => {
     }
 
     const docDefinition = {
-<<<<<<< HEAD
-        pageMargins: [40, 60, 40, 60],
-=======
-        pageMargins: [ 40, 50, 40, 60 ],
->>>>>>> seconddaypull
+        pageMargins: [40, 50, 40, 60],
         pageNumber: 1,
         content: [
             {
