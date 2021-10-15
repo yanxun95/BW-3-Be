@@ -40,16 +40,9 @@ profileRouter.post("/", async (req, res, next) => {
 
 profileRouter.get("/:id", async (req, res, next) => {
     try {
-        const eachprofile = await profilemodel.findById(req.params.id)
-        const convert = eachprofile.experiences[0].role
-        const eachprofilewithexp = await profilemodel.findOne({ role: `${convert}` }).populate('experiences')
-        if (eachprofile) {
-
-            res.send(eachprofilewithexp)
-        }
-        else {
-            next(createHttpError(404, `profile with id ${req.params.id} is not found`))
-        }
+        const eachprofile = await profilemodel.findById(req.params.id).populate('experiences')
+        if (eachprofile) res.send(eachprofile)
+        else next(createHttpError(404, `profile with id ${req.params.id} is not found`))
     } catch (error) {
         next(error)
     }
