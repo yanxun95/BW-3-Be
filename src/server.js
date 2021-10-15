@@ -18,7 +18,7 @@ server.use(express.json())
 
 // ************************* ROUTES ************************************
 
-server.use("/experience", experienceRouter)
+server.use("/experiences", experienceRouter)
 server.use("/profiles", profileRouter)
 
 
