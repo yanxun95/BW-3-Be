@@ -36,7 +36,7 @@ server.use(express.json())
 
 server.use("/experiences", experienceRouter)
 server.use("/profiles", profileRouter)
-
+server.use("/posts", postRoutes)
 
 // ************************** ERROR HANDLERS ***************************
 
