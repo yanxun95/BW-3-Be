@@ -7,6 +7,7 @@ import { v2 as cloudinary } from "cloudinary"
 import { CloudinaryStorage } from "multer-storage-cloudinary"
 import { pipeline } from "stream";
 import { gettingpdfwithcontent } from "./pdf.js"
+import experienceModel from "../experience/index.js"
 
 const profileRouter = express.Router()
 
@@ -39,9 +40,16 @@ profileRouter.post("/", async (req, res, next) => {
 
 profileRouter.get("/:id", async (req, res, next) => {
     try {
-        const eachprofile = await profilemodel.findById(req.params.id).populate('experiences')
-        if (eachprofile) res.send(eachprofile)
-        else next(createHttpError(404, `profile with id ${req.params.id} is not found`))
+        const eachprofile = await profilemodel.findById(req.params.id)
+        const convert = eachprofile.experiences[0].role
+        const eachprofilewithexp = await profilemodel.findOne({ role: `${convert}` }).populate('experiences')
+        if (eachprofile) {
+
+            res.send(eachprofilewithexp)
+        }
+        else {
+            next(createHttpError(404, `profile with id ${req.params.id} is not found`))
+        }
     } catch (error) {
         next(error)
     }
@@ -80,8 +88,13 @@ profileRouter.post("/:id/picture", multer({ storage: cloudStorage }).single("pro
 profileRouter.get("/:id/Pdf", async (req, res, next) => {
     try {
         res.setHeader("Content-Disposition", `attachment; filename: cv.pdf`)
+<<<<<<< HEAD
         const pdfdata = await profilemodel.findById(req.params.id)
         const { name, surname, email, image, area, experiences, bio } = pdfdata
+=======
+        const pdfdata = await profilemodel.findById(req.params.id).populate('experiences')
+        const {name, surname, email, image,area, experiences, bio} = pdfdata
+>>>>>>> seconddaypull
         console.log(pdfdata)
         const source = await gettingpdfwithcontent({ name, surname, email, image, area, experiences, bio })
         const destination = res
